@@ -25,17 +25,9 @@ router.put(
       }
       const ListID = req.params.id;
 
-      console.log(ListID);
-
-      let ListFields= {
-        ListName: String,
-        Products : String
-      };
 
       try {
         const list: IList  = await List.findById(ListID)
-
-        console.log(list);
 
         if (!list) {
           return res.status(HttpStatusCodes.BAD_REQUEST).json({
@@ -160,12 +152,10 @@ router.get("/all", auth, async (req:Request, res:Response) => {
 // @access  Public
 
 router.get("/userlist", auth, async (req:Request, res:Response) => {
-    console.log("blabls");
 
     const UserID = req.params.UserId;
     try{
         const lists = await List.find({UserID});
-        console.log(UserID);
         res.json(lists);
 
     }catch(err)
@@ -189,13 +179,10 @@ router.get(
            const isValidId = mongoose.Types.ObjectId.isValid(req.params.id);
 
            if (!isValidId) {
-               console.log("jbg");
             res.json("Id not valid");
            }
 
             const list : IList = await List.findById(req.params.id);
-
-            console.log(list);
 
             if(!list)
             {
