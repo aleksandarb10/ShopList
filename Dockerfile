@@ -1,15 +1,11 @@
-FROM node:12-slim
+FROM node:12
 
-WORKDIR /starter
-ENV NODE_ENV development
+WORKDIR /usr/src/app
 
-COPY package.json /starter/package.json
+COPY package*.json ./
 
-RUN npm install --production
+RUN npm install
 
-COPY .env.example /starter/.env.example
-COPY . /starter
+EXPOSE 5000
 
-CMD ["npm","start"]
-
-EXPOSE 8080
+CMD [ "node", "server.ts" ]

@@ -1,14 +1,15 @@
-import bcrypt from "bcryptjs";
+import bcrypt, { hash } from "bcryptjs";
 import config from "config";
 import { Router, Response } from "express";
 import { check, validationResult } from "express-validator/check";
-import gravatar from "gravatar";
 import HttpStatusCodes from "http-status-codes";
 import jwt from "jsonwebtoken";
 
 import Payload from "../../types/Payload";
 import Request from "../../types/Request";
-import User, { IUser } from "../../models/User";
+import User from "../../models/User";
+import IUser from "../../interfaces/User";
+import auth from "../../middleware/auth";
 
 const router: Router = Router();
 
@@ -25,13 +26,14 @@ router.post(
     ).isLength({ min: 6 })
   ],
   async (req: Request, res: Response) => {
+
+    console.log("hahahahha");
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
       return res
         .status(HttpStatusCodes.BAD_REQUEST)
         .json({ errors: errors.array() });
     }
-
     const { email, password } = req.body;
     try {
       let user: IUser = await User.findOne({ email });
@@ -45,23 +47,12 @@ router.post(
           ]
         });
       }
-
-      const options: gravatar.Options = {
-        s: "200",
-        r: "pg",
-        d: "mm"
-      };
-
-      const avatar = gravatar.url(email, options);
-
       const salt = await bcrypt.genSalt(10);
       const hashed = await bcrypt.hash(password, salt);
 
-      // Build user object based on IUser
       const userFields = {
         email,
-        password: hashed,
-        avatar
+        password: hashed
       };
 
       user = new User(userFields);
@@ -87,5 +78,86 @@ router.post(
     }
   }
 );
+
+// @route   GET api/user
+// @desc    Get current user's profile
+// @access  Private
+router.get("/", auth, async (req: Request, res: Response) => {
+  try {
+
+    const userid = req.params.userId;
+    const user: IUser = await User.findOne({
+      userid,
+    });
+    if (!user) {
+      return res.status(HttpStatusCodes.BAD_REQUEST).json({
+        errors: [
+          {
+            msg: "There is no profile for this user",
+          },
+        ],
+      });
+    }
+
+    res.json(user);
+  } catch (err) {
+    console.error(err.message);
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).send("Server Error");
+  }
+});
+
+// @route   Put api/user
+// @desc    Update user's profile
+// @access  Private
+router.put(
+  "/", auth, async (req: Request, res: Response) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res
+        .status(HttpStatusCodes.BAD_REQUEST)
+        .json({ errors: errors.array() });
+    }
+    const Password = req.body.password;
+    const UserID = req.params.UserId;
+
+    const salt = await bcrypt.genSalt(10);
+    const hashed = await bcrypt.hash(Password, salt);
+
+    try {
+      let user: IUser = await User.findOne({ UserID })
+      if (!user) {
+        return res.status(HttpStatusCodes.BAD_REQUEST).json({
+          errors: [
+            {
+              msg: "User not registered",
+            },
+          ],
+        });
+      }
+      else{
+        user = await User.findOneAndUpdate(
+         {password : hashed}
+        );
+       return res.json("Password updated");
+
+      }
+    } catch (err) {
+      console.error(err.message);
+      res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).send("Server Error");
+    }
+  }
+);
+// @route   GET api/user/all
+// @desc    Get all users
+// @access  Public
+router.get("/all", auth, async (_req: Request, res: Response) => {
+  try {
+    const users = await User.find();
+    res.json(users);
+  } catch (err) {
+    console.error(err.message);
+    res.status(HttpStatusCodes.INTERNAL_SERVER_ERROR).send("Server Error");
+  }
+});
 
 export default router;

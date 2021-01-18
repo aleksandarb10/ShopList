@@ -4,7 +4,8 @@ import express from "express";
 import connectDB from "../config/database";
 import auth from "./routes/api/auth";
 import user from "./routes/api/user";
-import profile from "./routes/api/profile";
+import list from "./routes/api/list";
+import report from "./routes/api/report"
 
 const app = express();
 
@@ -25,7 +26,7 @@ app.get("/", (_req, res) => {
 
 app.use("/api/auth", auth);
 app.use("/api/user", user);
-app.use("/api/profile", profile);
+app.use("/api/list", list);
 
 const port = app.get("port");
 const server = app.listen(port, () =>

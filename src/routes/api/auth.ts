@@ -8,7 +8,8 @@ import jwt from "jsonwebtoken";
 import auth from "../../middleware/auth";
 import Payload from "../../types/Payload";
 import Request from "../../types/Request";
-import User, { IUser } from "../../models/User";
+import User from "../../models/User";
+import IUser from "../../interfaces/User";
 
 const router: Router = Router();
 
@@ -69,7 +70,7 @@ router.post(
       }
 
       const payload: Payload = {
-        userId: user.id
+        userId: user._id
       };
 
       jwt.sign(
