@@ -7,9 +7,7 @@ import IList from "../interfaces/List";
       
         UserID:{type:String},
         ListName:{type:String,required:true,unique:true},
-        Products:{ type:[String,Number]},
-        _id:{ type: mongoose.Types.ObjectId} 
-       
+        Products:{ type:[String,Number]}
     },
     {
         timestamps: true

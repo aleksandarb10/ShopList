@@ -5,7 +5,7 @@ import IUser from './user';
 export default interface IList extends Document {
     UserID: string;
     ListName: string;
-    Products: [string, number];
+    Products: [string,number][];
     _id: mongoose.Types.ObjectId;
     
 }
